@@ -252,12 +252,13 @@ function create() {
       juice.y -= Math.random() * (1500 - 600) + 1500;
       juice.body.setAllowGravity(false);
       juice.body.velocity.y = Math.floor(Math.random() * (900 - 400)) + 400;
+
+      score += 10;
+      scoreText.setText('Score: ' + score);
     }
 
     this.physics.add.overlap(this.dino, juice, touchJuice, null, this);
 
-    score += 10;
-    scoreText.setText('Score: ' + score);
     objectsCount++;
     console.log(objectsCount);
 
