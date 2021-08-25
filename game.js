@@ -21,6 +21,8 @@ var config = {
 
 let gameOver = false;
 let objectsCount = 0;
+let timer = 0;
+let juiceItems = [];
 
 var game = new Phaser.Game(config);
 function preload() {
@@ -42,11 +44,19 @@ function preload() {
   this.load.image('background', 'assets/plx-2.png');
   this.load.image('selva', 'assets/selva.png');
   this.load.image('jose', 'assets/jose.png');
+  this.load.image('juice', 'assets/juice.png');
   this.load.spritesheet('skin', 'assets/Woodcutter_idle.png', { frameWidth: 48, frameHeight: 48 });
   this.load.spritesheet('jose-animation', 'assets/jose-animation.png', { frameWidth: 21, frameHeight: 28 });
 }
 
 function create() {
+  setInterval(function () {
+    if (objectsCount >= 10) return;
+
+    console.log('new item!');
+    spawnJuice();
+  }, 1000);
+
   this.add.image(200, 200, 'sky');
   let jungleGround = this.add.image(innerWidth / 2, innerHeight - 30, 'selva');
   jungleGround.setScale(2.7, 2);
@@ -187,36 +197,72 @@ function create() {
 
   function destroyOut(out, star) {
     // stars.x = 10;
-    console.log('Bomb');
-    console.log(star);
+    // console.log('Bomb');
+    // console.log(star);
     // star.disableBody(true, true);
     star.y -= Math.random() * (1500 - 600) + 1500;
     star.body.setAllowGravity(false);
     // this.dino.tint = 0xff0000;
   }
 
-  function collectStar(player, star) {
-    star.disableBody(true, true);
+  // function collectStar(player, star) {
+  //   star.disableBody(true, true);
 
-    score += 10;
-    scoreText.setText('Score: ' + score);
+  //   score += 10;
+  //   scoreText.setText('Score: ' + score);
 
-    if (stars.countActive(true) === 0) {
-      stars.children.iterate(function (child) {
-        child.enableBody(true, child.x, 0, true, true);
-      });
+  //   if (stars.countActive(true) === 0) {
+  //     stars.children.iterate(function (child) {
+  //       child.enableBody(true, child.x, 0, true, true);
+  //     });
 
-      var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+  //     var x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-      var bomb = bombs.create(x, 16, 'bomb');
-      bomb.setBounce(1);
-      bomb.setCollideWorldBounds(true);
-      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    }
-  }
+  //     var bomb = bombs.create(x, 16, 'bomb');
+  //     bomb.setBounce(1);
+  //     bomb.setCollideWorldBounds(true);
+  //     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+  //   }
+  // }
 
   // this.physics.add.collider(stars, this.ground);
   this.physics.add.overlap(this.out, stars, destroyOut, null, this);
+
+  let spawnJuice = () => {
+    let paddingX = 20;
+    let paddingY = 40;
+    let width = innerWidth - paddingX;
+    // let height = 0 - paddingY;
+    let randomPositionX = Math.floor(Math.random() * (width - 20)) + 20;
+    let randomPositionY = Math.floor(Math.random() * (-100 + 40)) - 40;
+
+    let juice = this.physics.add.group({
+      key: 'juice',
+      repeat: 0,
+      setXY: { x: randomPositionX, y: randomPositionY, stepX: 32 * 2 },
+      // setScale: { x: 2, y: 2 },
+    });
+
+    // juice.children.entries[0].body.setAllowGravity(false);
+
+    juiceItems.push(juice.children.entries[0]);
+
+    function touchJuice(player, juice) {
+      console.log('juice!!');
+      juice.y -= Math.random() * (1500 - 600) + 1500;
+      juice.body.setAllowGravity(false);
+      juice.body.velocity.y = Math.floor(Math.random() * (900 - 400)) + 400;
+    }
+
+    this.physics.add.overlap(this.dino, juice, touchJuice, null, this);
+
+    score += 10;
+    scoreText.setText('Score: ' + score);
+    objectsCount++;
+    console.log(objectsCount);
+
+    // this.physics.add.overlap(this.ground, test, destroyOut, null, this);
+  };
 
   // rest of the code
   // dino = this.physics.add.sprite(0, height, 'dino-idle').setCollideWorldBounds(true).setGravityY(5000).setOrigin(0, 1);
@@ -256,8 +302,8 @@ function create() {
     repeat: -1,
   });
 
-  skin = this.physics.add.sprite(100, 100, 'skin');
-  skin.anims.play('walk', true);
+  // skin = this.physics.add.sprite(100, 100, 'skin');
+  // skin.anims.play('walk', true);
 
   this.dino.anims.play('jose', true);
   // skin.anims.play('walk', true);
